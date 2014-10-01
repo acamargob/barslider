@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"></script>
+        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="barslider.js"></script>
+        <link rel="stylesheet" href="barslider.css" />
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('#barSlider').barslider({
+                    min     :   0,
+                    max     :   100,
+                    fn      :   function(value){return Math.sin(value/10)+1;},
+                    barStyle:   {
+                        padding     :   0,
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id ="barSlider"></div>
+    </body>
+</html>
