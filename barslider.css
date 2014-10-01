@@ -1,3 +1,6 @@
 .barslider .ui-slider{
     margin: auto;
 }
+.barslider canvas{
+    width: 100%;
+}
