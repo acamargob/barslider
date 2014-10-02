@@ -2,10 +2,20 @@
  
     $.fn.barslider = function( options ) {
         
+        this.addClass('barslider');
+        
+        this.filter("div").each(function() {
+            $(this).html('<canvas></canvas><div></div>');
+        });
+        
+        var canvas = this.children("canvas");
+        var slider = this.children("div");
+        
         var settings = $.extend(true,{
             min     :   0,
             max     :   5,
             step    :   1,
+            height  :   135,
             callback:   function(){return;},
             fn      :   function(value){return value+1;},
             barStyle:   {
@@ -17,11 +27,11 @@
             label   :   {
                 font            :   'bold 15px Verdana',
                 format          :   function(value){return value;}
-            }
-            
+            }      
         }, options);
         
         var originalWidth = this.width();
+        
         
         this.addClass('barslider');
         
@@ -31,6 +41,8 @@
         
         var canvas = this.children("canvas");
         var slider = this.children("div");
+        
+        $(canvas).height(settings.height);
         var numColumns = settings.max - settings.min + 1;
         slider.width(originalWidth/numColumns * (numColumns - 1));
         
@@ -38,27 +50,23 @@
             min     :   settings.min,
             max     :   settings.max,
             range   :   'min',
-            slide   :   function(event, ui){
-                drawGraph(canvas, settings, ui.value, originalWidth);
-                settings.callback();
+            change  :   function(event, ui){
+                settings.callback(ui.value,drawGraph(canvas, settings, ui.value, originalWidth));
             }
         });
         
-        drawGraph(canvas, settings, settings.min, originalWidth);
+        settings.callback(settings.min,drawGraph(canvas, settings, settings.min, originalWidth));
+        
  
-        
-        
         return this;
  
     };
     
     //Draws the bar graph
     //element: The canvas tag where the graph will be drawn
-    //min: The minimum value to evaluate
-    //max: The maximum value to evaluate
-    //step: The step size for evaluation
-    //eval: The function that defines each bar's height
+    //settings: The plugin settings
     //selected: The currently selected value in the slider
+    //width: The canvas width
     function drawGraph(element, settings, selected, width) {
         var contextHeight;
         var contextWidth;
@@ -74,11 +82,12 @@
         var maxValue;
         var value;
         var barHeight;
+        var result;
         
+        result = settings.fn(settings.min);
         
-        contextHeight = parseInt($(element).height());
+        contextHeight = settings.height;
         contextWidth = width;
-        
         canvasId = $(element).attr("id");
         canvas = $(element)[0];
         canvas.width = width;
@@ -94,16 +103,17 @@
         maxValue = Math.max(
             settings.fn(settings.min), 
             settings.fn(settings.max),
-            settings.fn((settings.min-settings.max) / 2)
+            settings.fn((settings.max-settings.min) / 2)
         );
-        for (i = settings.max; i >= 0; i -= settings.step) {
+        for (i = settings.max; i >= settings.min; i -= settings.step) {
             value = settings.fn(i);
             barHeight = maxHeight * (value/maxValue);
             yPos = contextHeight - barHeight;
-            if(selected == i) {
+            if(Math.abs(i-selected)<settings.step/2) {
                 context.fillStyle = settings.barStyle.highlightColor;
                 context.font = settings.label.font;
-                context.fillText(value,xPos,yPos-4);
+                context.fillText(settings.label.format(value),xPos,yPos-4);
+                result = value;
             } else {
                 context.fillStyle = settings.barStyle.fillStyle;
                 context.strokeStyle = settings.barStyle.strokeStyle;
@@ -122,5 +132,6 @@
             )
             xPos -= barWidth;
         }
+        return result;
     }
 }( jQuery ));
